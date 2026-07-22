@@ -1,0 +1,11 @@
+Index,issue_category,issue_subcategory
+1,"Access & Identity","Account Suspension"
+2,"Product Functionality","Bug Report"
+3,"Data & Integration","Data Sync Issue"
+4,"Product Functionality","Feature Request"
+5,"Access & Identity","Login Issue"
+6,"Billing & Subscription","Payment Problem"
+7,"Performance & Reliability","Performance Issue"
+8,"Billing & Subscription","Refund Request"
+9,"Security & Privacy","Security Concern"
+10,"Billing & Subscription","Subscription Cancellation"

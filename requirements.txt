@@ -1,0 +1,5 @@
+﻿streamlit==1.59.2
+openai==2.46.0
+duckdb==1.5.4
+pandas==3.0.3
+python-dotenv==1.2.2
