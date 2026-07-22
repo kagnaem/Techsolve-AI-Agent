@@ -189,6 +189,17 @@ def display_result_evidence(result_df) -> None:
 
     temporal_words = ("date", "month", "year", "week", "quarter", "time")
     is_time_series = any(word in dimension.lower() for word in temporal_words)
+    measure_name = measure.lower().replace("_", " ")
+    part_to_whole_terms = ("count", "tickets", "total", "share", "percentage", "percent")
+    non_additive_terms = ("rate", "average", "avg", "hours", "duration", "time")
+    is_part_to_whole = (
+        2 <= len(chart_data) <= 6
+        and chart_data[measure].ge(0).all()
+        and chart_data[measure].sum() > 0
+        and any(term in measure_name for term in part_to_whole_terms)
+        and not any(term in measure_name for term in non_additive_terms)
+    )
+
     if is_time_series:
         line_chart = (
             alt.Chart(chart_data)
@@ -205,6 +216,43 @@ def display_result_evidence(result_df) -> None:
         )
         st.altair_chart(line_chart, width="stretch")
         st.caption(f"Line chart: {measure.replace('_', ' ').title()} by {dimension.replace('_', ' ').title()}")
+    elif is_part_to_whole:
+        chart_data["Chart share"] = chart_data[measure] / chart_data[measure].sum()
+        donut_colour = alt.Color(
+            f"{dimension}:N",
+            title=dimension.replace("_", " ").title(),
+            scale=alt.Scale(range=chart_palette),
+            legend=alt.Legend(orient="right", labelLimit=220),
+        )
+        donut_tooltips = [
+            alt.Tooltip(f"{dimension}:N", title=dimension.replace("_", " ").title()),
+            alt.Tooltip(f"{measure}:Q", title=measure.replace("_", " ").title(), format=","),
+            alt.Tooltip("Chart share:Q", title="Share", format=".1%"),
+        ]
+        donut = (
+            alt.Chart(chart_data)
+            .mark_arc(innerRadius=72, outerRadius=135, cornerRadius=3, padAngle=0.015)
+            .encode(
+                theta=alt.Theta(f"{measure}:Q", stack=True),
+                color=donut_colour,
+                order=alt.Order(f"{measure}:Q", sort="descending"),
+                tooltip=donut_tooltips,
+            )
+        )
+        labels = (
+            alt.Chart(chart_data)
+            .mark_text(radius=105, size=13, fontWeight="bold", color="#F8FAFC")
+            .encode(
+                theta=alt.Theta(f"{measure}:Q", stack=True),
+                order=alt.Order(f"{measure}:Q", sort="descending"),
+                text=alt.Text("Chart share:Q", format=".0%"),
+            )
+        )
+        st.altair_chart((donut + labels).properties(height=360), width="stretch")
+        st.caption(
+            f"Donut chart: share of {measure.replace('_', ' ').title()} "
+            f"by {dimension.replace('_', ' ').title()}"
+        )
     else:
         category_colour = alt.Color(
             f"{dimension}:N",
