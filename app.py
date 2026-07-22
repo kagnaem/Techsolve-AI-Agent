@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import altair as alt
 import duckdb
 import streamlit as st
 from dotenv import load_dotenv
@@ -172,15 +173,74 @@ def display_result_evidence(result_df) -> None:
     if chart_data.empty:
         return
     chart_data[dimension] = chart_data[dimension].astype(str)
-    chart_data = chart_data.set_index(dimension)
+
+    chart_palette = [
+        "#38BDF8",  # sky blue
+        "#F59E0B",  # amber
+        "#14B8A6",  # teal
+        "#F43F5E",  # rose
+        "#8B5CF6",  # violet
+        "#84CC16",  # lime
+        "#F97316",  # orange
+        "#EC4899",  # pink
+        "#06B6D4",  # cyan
+        "#A78BFA",  # lavender
+    ]
 
     temporal_words = ("date", "month", "year", "week", "quarter", "time")
     is_time_series = any(word in dimension.lower() for word in temporal_words)
     if is_time_series:
-        st.line_chart(chart_data, color="#2dd4bf", width="stretch")
+        line_chart = (
+            alt.Chart(chart_data)
+            .mark_line(point=alt.OverlayMarkDef(filled=True, size=65), strokeWidth=3)
+            .encode(
+                x=alt.X(f"{dimension}:O", title=dimension.replace("_", " ").title(), sort=None),
+                y=alt.Y(f"{measure}:Q", title=measure.replace("_", " ").title()),
+                color=alt.value("#2DD4BF"),
+                tooltip=[
+                    alt.Tooltip(f"{dimension}:O", title=dimension.replace("_", " ").title()),
+                    alt.Tooltip(f"{measure}:Q", title=measure.replace("_", " ").title(), format=","),
+                ],
+            )
+        )
+        st.altair_chart(line_chart, width="stretch")
         st.caption(f"Line chart: {measure.replace('_', ' ').title()} by {dimension.replace('_', ' ').title()}")
     else:
-        st.bar_chart(chart_data, color="#38bdf8", width="stretch")
+        category_colour = alt.Color(
+            f"{dimension}:N",
+            title=dimension.replace("_", " ").title(),
+            scale=alt.Scale(range=chart_palette),
+            legend=None,
+        )
+        tooltips = [
+            alt.Tooltip(f"{dimension}:N", title=dimension.replace("_", " ").title()),
+            alt.Tooltip(f"{measure}:Q", title=measure.replace("_", " ").title(), format=","),
+        ]
+
+        # Horizontal bars keep long issue, team and region names readable.
+        if chart_data[dimension].str.len().max() > 12 or len(chart_data) > 8:
+            bar_chart = (
+                alt.Chart(chart_data)
+                .mark_bar(cornerRadiusEnd=4)
+                .encode(
+                    y=alt.Y(f"{dimension}:N", title=None, sort="-x"),
+                    x=alt.X(f"{measure}:Q", title=measure.replace("_", " ").title()),
+                    color=category_colour,
+                    tooltip=tooltips,
+                )
+            )
+        else:
+            bar_chart = (
+                alt.Chart(chart_data)
+                .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                .encode(
+                    x=alt.X(f"{dimension}:N", title=None, sort="-y", axis=alt.Axis(labelAngle=0)),
+                    y=alt.Y(f"{measure}:Q", title=measure.replace("_", " ").title()),
+                    color=category_colour,
+                    tooltip=tooltips,
+                )
+            )
+        st.altair_chart(bar_chart, width="stretch")
         st.caption(f"Bar chart: {measure.replace('_', ' ').title()} by {dimension.replace('_', ' ').title()}")
 
 st.markdown(
