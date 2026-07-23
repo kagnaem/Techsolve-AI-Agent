@@ -26,16 +26,18 @@ The default reporting scope is **1 January 2024 to 31 December 2025**. The 2025 
 4. DuckDB runs the approved read-only query on the prepared reporting tables.
 5. The agent returns a plain-English explanation, the supporting data and a chart selected for the result.
 
-```text
-Manager question
-      ↓
-OpenAI query planning
-      ↓
-SQL validation and safety controls
-      ↓
-DuckDB analytical tables
-      ↓
-Answer + evidence table + chart
+```mermaid
+flowchart LR
+    A["Manager asks an operational question"] --> B["OpenAI interprets the request"]
+    B --> C["Prepare a DuckDB SQL query"]
+    C --> D{"Safety validation"}
+    D -->|"Approved"| E["Run the read-only query in DuckDB"]
+    D -->|"Rejected"| F["Return a safe error message"]
+    E --> G["Prepare the evidence table"]
+    G --> H["Generate a plain-English insight"]
+    G --> I["Select an appropriate chart"]
+    H --> J["Answer with evidence"]
+    I --> J
 ```
 
 ## What the prototype demonstrates
