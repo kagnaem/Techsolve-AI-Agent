@@ -17,20 +17,10 @@ python -m streamlit run app.py
 
 ## Deploy on Streamlit Community Cloud
 
-1. Store this project in a GitHub repository. A private repository is
-   recommended for the assessment.
-2. In Streamlit Community Cloud, select the repository, branch and `app.py`.
-3. Open **Advanced settings > Secrets** and add:
-
-```toml
-OPENAI_API_KEY = "your-key-here"
-OPENAI_MODEL = "gpt-5.6"
-```
-
-4. Deploy and test one of the suggested questions.
-
-Never commit `.env` or `.streamlit/secrets.toml`. Both are excluded by
-`.gitignore`.
+1. This project is stored in a GitHub repository. 
+2. This repository is used in Streamlit Community Cloud's branch
+3. Open AI key is stored in secretly in Streamlit Community Cloud 
+4. app.py is deployed and tested.
 
 ## Data and responsible use
 
