@@ -100,6 +100,8 @@ A production version could connect to a governed warehouse or Power BI semantic 
 
 ## Run locally
 
+The live demonstration can be used without installing anything. The following instructions are provided for reviewers who want to download the source code and run the prototype on their own computer.
+
 1. Create a local `.env` file from `.env.example`.
 2. Add `OPENAI_API_KEY` and, optionally, `OPENAI_MODEL`.
 3. Install the required packages:
